@@ -27,4 +27,5 @@ npm install mathjs --production --prefix ~/environment/
 - [ ] Validation for the interface:
    - col count in each row must be same
    - All values are numeric
-   - Test with 1 row, 1 col, etc. 
+   - Test with 1 row only
+   - Test with 1 col only 
