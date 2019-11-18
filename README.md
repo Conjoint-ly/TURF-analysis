@@ -1,5 +1,5 @@
 # TURF Analysis
-TURF Analysis, an acronym for "Total Unduplicated Reach and Frequency", is a type of statistical analysis used for providing estimates of media or market potential and devising optimal communication and placement strategies given limited resources. TURF analysis identifies the number of users reached by a communication, and how often they are reached.
+[TURF Analysis](https://conjoint.online/2019/11/18/turf-analysis/), an acronym for "Total Unduplicated Reach and Frequency", is a type of statistical analysis used for providing estimates of media or market potential and devising optimal communication and placement strategies given limited resources. TURF analysis identifies the number of users reached by a communication, and how often they are reached.
 
 This library is work in progress.
 
@@ -9,7 +9,7 @@ This library is work in progress.
 npm install mathjs --production --prefix ~/environment/
 ```
 
-### Steps and to-dos
+### Development progress ahead of release
 
 - [x] Search for Reach           
 - [x] Allow for Frequency
