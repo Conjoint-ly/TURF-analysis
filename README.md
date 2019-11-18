@@ -29,3 +29,4 @@ npm install mathjs --production --prefix ~/environment/
    - All values are numeric
    - Test with 1 row only
    - Test with 1 col only 
+- [ ] Clean up the repository
