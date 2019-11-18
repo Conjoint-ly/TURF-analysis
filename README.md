@@ -14,17 +14,17 @@ npm install mathjs --production --prefix ~/environment/
 - [x] Search for Reach           
 - [x] Allow for Frequency
 - [ ] Nice outputs: Each scenario shows:
-	    	- Reach
-	    	- Frequency
-	    	- For each element, unique reach ; Non-unique-reach 
+   - Reach
+   - Frequency
+   - For each element, unique reach ; Non-unique-reach 
 - [x] Encasulate in class or prototype
 - [ ] Write interface
-	        - Free form
-	        - Prepopulate with combinations of 2
-	        - Prepopulate with ladder
+   - Free form
+   - Prepopulate with combinations of 2
+   - Prepopulate with ladder
 - [ ] Speed up and test robustness (repeat tests)
 - [ ] Place into worker
 - [ ] Validation for the interface:
-    * col count in each row must be same
-    * All values are numeric
-    * Test with 1 row, 1 col, etc. 
+   - col count in each row must be same
+   - All values are numeric
+   - Test with 1 row, 1 col, etc. 
