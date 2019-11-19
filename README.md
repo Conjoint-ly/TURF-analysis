@@ -11,6 +11,8 @@ npm install mathjs --production --prefix ~/environment/
 
 ### Development progress ahead of release
 
+Current tasks: https://github.com/Conjoint-ly/TURF-analysis/blob/master/%D0%97%D0%B0%D0%B4%D0%B0%D1%87%D0%B0.md
+
 - [x] Search for Reach           
 - [x] Allow for Frequency
 - [ ] Nice outputs: Each scenario shows:
