@@ -11,6 +11,9 @@
   <script type="text/javascript">
 	/* global math */
   
+  
+	// Пример входных данных
+	
 	var A =  [
 		[0,-3.05920209082898,1.04768042202492,-3.55465460552836,-3.98029114929742,-4.00309310744563,-3.38398352527482,-1.79917087900046],
 		[0,0.512813624763049,1.55380391987936,6.84118377745602,5.23618607956046,3.03605507843981,0.807520169182214,1.32050938287159],
@@ -214,6 +217,9 @@
 		
 	
 	let TURF = class{
+	
+		// Конструктор, который берет данные и настройки того, какое значение в яйчейке считать за успешное 
+		
 		constructor(originalMatrix,conversionMethod="top", cutoffValue=1) {
 			
 			var preparedMatrix=[];
@@ -227,7 +233,8 @@
 		}
 		
 		
-		// Conversion methods:
+		// Разные методы настройки того, какое значение в яйчейке считать за успешное 
+		
 		top(row,cutoffValue){
 			return (this.lesserThanOrEqualTo(this.rank(row),cutoffValue));
 		}
@@ -242,13 +249,14 @@
 		}
 		
 		
-		// Utility functions
+		// Вспомогательные функции
+		
 		rank(arr){
 			var sorted = arr.slice().sort(function(a,b){return b-a;});
 			return(arr.slice().map(function(v){ return sorted.indexOf(v)+1; }));
 		};
 		displayPreparedMatrix(){
-	        var html_ = "<br><table  border='1'><tbody>";
+	        var html_ = "<br><table border='1'><tbody>";
 	        
 	        this.preparedMatrix.forEach(function(row){
 	            html_ += "<tr>";
@@ -268,21 +276,66 @@
 	        return(result);
 		};
 		
-		// Core functions
-		calcMetrics(S){
+		
+		/* Функция, которая считаем сами метрики - reach и frequency
+		
+		 withReachByElement = true требуется когда отрисовываются графики, потому что reachByElement показывает проценты метрики reach для каждого концепта
+		 Она выдаёт например такое:
+		
+			{"frequency":1.245152354570637,"reach":0.6446428571428572,"elements":[1,2],"name":"Test B","reachByElement":{"common":0.15803571428571428,"e1":0.2330357142857143,"e2":0.25357142857142856}}
+			
+			Это означает, что мы рассматриваем сочетание элементов 1 и 2. 
+			Сочетание (сценарий) называется "Test B"
+			frequency = 1.25
+			reach = 64.5%
+			
+			В графике мы отрисуем для элемента 1 (e1):  23.3%
+			                      для элемента 2 (e2):  25.4%
+			                      общий охват (common): 15.8%%
+			
+		
+		*/
+		
+		calcMetrics(S,withReachByElement=false){
+			var that = this;
 			var I = math.zeros(this.size[1]);
 			S.elements.forEach(function(element){
 			    I.set([element],1);
 			});
 			var product = math.multiply( this.preparedMatrix, I );
 			var positiveCount = math.sum(math.isPositive(product));
+			
+			if(withReachByElement){
+				var reachByElement={
+					"common": math.sum(math.larger(product,1))/this.size[0]
+				}; 
+				S.elements.forEach(function(element){
+					var subI = math.zeros(that.size[1]);
+					subI.set([element],1);
+					var subProduct = math.multiply( that.preparedMatrix, subI );
+					var specificCount = math.sum(math.and(
+						math.equal(product,1),
+						math.equal(subProduct,1)
+					));
+					reachByElement["e"+element] = specificCount/that.size[0];
+				});		
+			}else{
+				var reachByElement=null;
+			}
+			
 			return({
 				frequency: math.sum(product)/positiveCount,
 				reach: positiveCount/this.size[0],
 				elements: S.elements,
-				name: S.name
+				name: S.name,
+				reachByElement: reachByElement
 			});
 		}
+		
+		// Функция, которая составляет лесенку - массив сценариев, которые содержат оптимальные сочетания концептов.
+		// Первый элемент лесенки - сценарий с один оптимальным концептом
+		// второй - сочетание сценариев с двумя оптимальными концептами
+		// и так далее
 		calcLadder(){
 		  var ladder=[null];
 		  for (var i = 1; i <= this.size[1]; i++) {
@@ -296,6 +349,10 @@
 		  }
 		  return(ladder);
 		};
+		
+		// Функция, которая выполняет поиск оптимальных сочетаний концептов
+		// dim - это сколько концептов в сочетании 
+		// top - это сколько оптимальных сочетаний-концептов выдать
 		search(dim=1,top=20){
 	        if(dim> this.size[1]){
 				console.log("Error: Not enough dimensions");
@@ -365,36 +422,12 @@
 	};
 	
 	
-	
+	// Пример запросов
 	var T1 = new TURF(A);
 	var T2 = new TURF(A,"greaterThan",1);
-	
-	
-	/*
-	
-	    Steps in development:
-	    [V] Search for Reach           
-	    [V] Allow for Frequency
-	    [3] Nice outputs: Each scenario shows:
-	    	- Reach
-	    	- Frequency
-	    	- For each element, unique reach ; Non-unique-reach 
-	    [V] Encasulate in class or prototype
-	    [5] Write interface
-	        - Free form
-	        - Prepopulate with combinations of 2
-	        - Prepopulate with ladder
-	    [6] Speed up and test robustness (repeat tests)
-	    [7] Place into worker
-	   
-	   
-	   Validation for the interface:
-		* col count in each row must be same
-		* All values are numeric
-		
-		Test with 1 row, 1 col, etc. 
-
-	*/
+	var T2ladder = T2.calcLadder();
+	console.log(T1.calcMetrics({elements:[1,2],name:"Test A"},true));
+	var BB = new TURF(B); console.log(BB.calcMetrics({elements:[1,2],name:"Test B"},true));
 
 	
   </script>
