@@ -1,5 +1,5 @@
-import turf from './src/core';
+const { TurfAnalysis } = require('./src/core');
 
-export default {
-  turf,
+module.exports = {
+  TurfAnalysis,
 };
