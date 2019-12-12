@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "TURF Analysis Core Application",
   "main": "index.js",
-  "repository": "git@github.com:log1st/turf-analysis-core.git",
+  "repository": "git@github.com:Conjoint-ly/turf-analysis-core.git",
   "author": {
     "name": "Sergey Perenets",
     "email": "log1st.ps@gmail.com",
