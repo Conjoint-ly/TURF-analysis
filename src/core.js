@@ -18,12 +18,27 @@ function prepareMatrix(inputMatrix, conversionMethod, cutoffValue) {
 }
 
 /**
+ * @param {Array} size
+ * @param {Function} calcMetrics
+ * @param {Number} [dim=1]
+ * @param {Number} [top=20]
+ */
+function searchInLadder(size, calcMetrics, dim = 1, top = 20) {
+
+}
+
+/**
  * @typedef CalcMatrixResult
  * @property {Number} frequency
  * @property {Number} reach
  * @property {[Number]} elements
  * @property {String} name
  * @property {Object} reachByElement
+ */
+
+/**
+ * @typedef CalcLadderResult
+ *
  */
 
 /**
@@ -42,11 +57,11 @@ class TurfAnalysis {
     }
 
     const {
-      originalMatrix,
+      // originalMatrix,
       preparedMatrix,
     } = prepareMatrix(inputMatrix, conversionMethod, cutoffValue);
 
-    this.originalMatrix = originalMatrix;
+    // this.originalMatrix = originalMatrix;
     this.preparedMatrix = preparedMatrix;
     this.preparedMatrixSize = preparedMatrix.size();
   }
@@ -98,6 +113,25 @@ class TurfAnalysis {
       ...source,
       reachByElement,
     };
+  }
+
+  /**
+   * @returns {CalcLadderResult}
+   */
+  calcLadder() {
+    const ladder = [null];
+
+    for (let i = 1; i <= this.preparedMatrixSize[1]; i += 1) {
+      // eslint-disable-next-line prefer-destructuring
+      ladder[i - 1] = searchInLadder(
+        this.preparedMatrixSize,
+        this.calcMetrics,
+        i,
+      )[0];
+      ladder[i - 1].name = `Top ${i === 1 ? 'item' : `${i}-way combo`}`;
+    }
+
+    return ladder;
   }
 }
 
