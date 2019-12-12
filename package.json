@@ -1,7 +1,7 @@
 {
   "name": "turf-analysis-core",
   "version": "1.0.0",
-  "description": "TURN Analysis Core Application",
+  "description": "TURF Analysis Core Application",
   "main": "index.js",
   "repository": "git@github.com:log1st/turf-analysis-core.git",
   "author": {
