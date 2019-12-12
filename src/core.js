@@ -13,7 +13,7 @@ function prepareMatrix(inputMatrix, conversionMethod, cutoffValue) {
   });
 
   return {
-    originalMatrix: math.matrix(this.originalMatrix),
+    originalMatrix: math.matrix(inputMatrix),
     preparedMatrix: math.matrix(preparedMatrix),
   };
 }
@@ -79,7 +79,7 @@ function searchInLadder(size, calcMetrics, dimensions = 1, top = 20) {
     throw new NotEnoughDimensionsException();
   }
 
-  const sequence = math.range(0, this.size[1]);
+  const sequence = math.range(0, size[1]);
   const dimSequence = math.range(0, dimensions);
 
   let candidates = [];
@@ -97,7 +97,7 @@ function searchInLadder(size, calcMetrics, dimensions = 1, top = 20) {
 
   candidates = math.sort(candidates, sortByReachAndFrequency);
   const minTop = math.min(top, candidates.length);
-  candidates = safeSubset(candidates, math.index(math.rand(0, minTop)));
+  candidates = safeSubset(candidates, math.index(math.range(0, minTop)));
 
   for (let j = 0; j < 20; j += 1) {
     for (let i = 0; i < minTop; i += 1) {
@@ -223,7 +223,7 @@ class TurfAnalysis {
       // eslint-disable-next-line prefer-destructuring
       ladder[i - 1] = searchInLadder(
         this.preparedMatrixSize,
-        this.calcMetrics,
+        this.calcMetrics.bind(this),
         i,
       )[0];
       ladder[i - 1].name = `Top ${i === 1 ? 'item' : `${i}-way combo`}`;

@@ -21,6 +21,6 @@ const top = (
   rank(row), cutoffValue,
 );
 
-export {
+module.exports = {
   top,
 };
