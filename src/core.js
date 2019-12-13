@@ -1,4 +1,8 @@
-const math = require('mathjs');
+const {
+  matrix, subset, larger, range, pickRandom,
+  sort, min, index, zeros, multiply, sum,
+  isPositive, and, equal,
+} = require('mathjs');
 const conversions = require('./conversions');
 const { NotEnoughDimensionsException } = require('./exceptions/NotEnoughDimensionsException');
 const { UnknownConversionTypeException } = require('./exceptions/UnknownConversionTypeException');
@@ -8,13 +12,16 @@ function prepareMatrix(inputMatrix, conversionMethod, cutoffValue) {
 
   inputMatrix.forEach((element) => {
     preparedMatrix.push(
-      conversions[conversionMethod](element, cutoffValue),
+      conversions[conversionMethod](
+        element.map((cell) => ((Number(cell) !== cell) ? 1 : cell)),
+        cutoffValue,
+      ),
     );
   });
 
   return {
-    originalMatrix: math.matrix(inputMatrix),
-    preparedMatrix: math.matrix(preparedMatrix),
+    originalMatrix: matrix(inputMatrix),
+    preparedMatrix: matrix(preparedMatrix),
   };
 }
 
@@ -58,11 +65,11 @@ const checkDuplicates = (arr) => {
 
 /**
  * @param {Array} value
- * @param {Number} index
+ * @param {Number} maxIndex
  * @returns {*}
  */
-const safeSubset = (value, index) => {
-  const result = math.subset(value, index);
+const safeSubset = (value, maxIndex) => {
+  const result = subset(value, maxIndex);
 
   return Array.isArray(result) ? result : [result];
 };
@@ -70,55 +77,54 @@ const safeSubset = (value, index) => {
 /**
  * @param {Array} size
  * @param {Function} calcMetrics
- * @param {Number} [dimensions=1]
+ * @param {Number} [elementsLength=1]
  * @param {Number} [top=20]
- * @TODO understand
  */
-function searchInLadder(size, calcMetrics, dimensions = 1, top = 20) {
-  if (dimensions > size[1]) {
+function searchInLadder(size, calcMetrics, elementsLength = 1, top = 20) {
+  if (elementsLength > size[1]) {
     throw new NotEnoughDimensionsException();
   }
 
-  const sequence = math.range(0, size[1]);
-  const dimSequence = math.range(0, dimensions);
+  const sequence = range(0, size[1]);
+  const dimSequence = range(0, elementsLength);
 
   let candidates = [];
   const joinedStrings = [];
 
   for (let i = 0; i < 1000; i += 1) {
-    const elements = math.sort(math.pickRandom(sequence, dimensions));
+    const elements = sort(pickRandom(sequence, elementsLength));
     const joinedString = elements.join(',');
     if (joinedStrings.includes(joinedString)) {
       continue;
     }
     joinedStrings.push(joinedString);
-    candidates.push(calcMetrics({ elements }));
+    candidates.push(calcMetrics({ source: { elements } }));
   }
 
-  candidates = math.sort(candidates, sortByReachAndFrequency);
-  const minTop = math.min(top, candidates.length);
-  candidates = safeSubset(candidates, math.index(math.range(0, minTop)));
+  candidates = sort(candidates, sortByReachAndFrequency);
+  const minTop = min(top, candidates.length);
+  candidates = safeSubset(candidates, index(range(0, minTop)));
 
   for (let j = 0; j < 20; j += 1) {
     for (let i = 0; i < minTop; i += 1) {
       let elements = [...candidates[i].elements];
       // eslint-disable-next-line prefer-destructuring
-      elements[math.pickRandom(dimSequence, 1)[0]] = math.pickRandom(sequence, 1)[0];
+      elements[pickRandom(dimSequence, 1)[0]] = pickRandom(sequence, 1)[0];
 
       if (checkDuplicates(elements)) {
         continue;
       }
 
-      elements = math.sort(elements);
+      elements = sort(elements);
       const joinedString = elements.join(',');
       if (joinedStrings.includes(joinedString)) {
         continue;
       }
       joinedStrings.push(joinedString);
-      candidates.push(calcMetrics({ elements }));
+      candidates.push(calcMetrics({ source: { elements } }));
     }
-    candidates = math.sort(candidates, sortByReachAndFrequency);
-    candidates = safeSubset(candidates, math.index(math.range(0, minTop)));
+    candidates = sort(candidates, sortByReachAndFrequency);
+    candidates = safeSubset(candidates, index(range(0, minTop)));
   }
 
   return candidates;
@@ -144,11 +150,11 @@ function searchInLadder(size, calcMetrics, dimensions = 1, top = 20) {
  */
 class TurfAnalysis {
   /**
-   * @param {[Array]} inputMatrix
-   * @param {('top'|'less'|'lessOrEqual'|'more'|'moreOrEqual')} [conversionMethod='top']
+   * @param {[[Number]]} records
+   * @param {('top'|'equal'|'less'|'lessOrEqual'|'more'|'moreOrEqual')} [conversionMethod='top']
    * @param {Number} [cutoffValue=1]
    */
-  constructor(inputMatrix, conversionMethod = 'top', cutoffValue = 1) {
+  constructor(records, conversionMethod = 'top', cutoffValue = 1) {
     if (!(conversionMethod in conversions)) {
       throw new UnknownConversionTypeException();
     }
@@ -156,7 +162,7 @@ class TurfAnalysis {
     const {
       // originalMatrix,
       preparedMatrix,
-    } = prepareMatrix(inputMatrix, conversionMethod, cutoffValue);
+    } = prepareMatrix(records, conversionMethod, cutoffValue);
 
     // this.originalMatrix = originalMatrix;
     this.preparedMatrix = preparedMatrix;
@@ -164,48 +170,54 @@ class TurfAnalysis {
   }
 
   /**
-   * @param {Object} source
-   * @param {[Number]} source.elements
-   * @param {String} source.name
-   * @param {Boolean} [withReachByElement=false]
+   * @param {Object} args
+   * @param {Object} args.source
+   * @param {[Number]} args.source.elements
+   * @param {String} args.source.name
+   * @param {Boolean} args.withReachByElement [withReachByElement=false]
+   * @param {Function} handler
    * @returns {CalcMatrixResult}
    */
-  calcMetrics(source, withReachByElement = false) {
-    const i = math.zeros(this.preparedMatrixSize[1]);
+  calcMetrics({
+    source,
+    withReachByElement = false,
+  }, handler = null) {
+    const i = zeros(this.preparedMatrixSize[1]);
 
-    // @TODO understand
     source.elements.forEach((element) => {
       i.set([element], 1);
     });
 
-    const product = math.multiply(this.preparedMatrix, i);
-    const positiveCount = math.sum(math.isPositive(product));
+    const product = multiply(this.preparedMatrix, i);
+    const positiveCount = sum(isPositive(product));
 
     let reachByElement = null;
 
-    // @TODO understand
     if (withReachByElement) {
       reachByElement = {
-        common: math.sum(math.larger(product, 1)) / this.preparedMatrixSize[0],
+        common: sum(larger(product, 1)) / this.preparedMatrixSize[0],
       };
 
-      source.elements.forEach((element) => {
-        const subI = math.zeros(this.preparedMatrixSize[1]);
+      source.elements.forEach((element, elIndex) => {
+        const subI = zeros(this.preparedMatrixSize[1]);
         subI.set([element], 1);
-        const subProduct = math.multiply(this.preparedMatrix, subI);
-        const specificCount = math.sum(
-          math.and(
-            math.equal(product, 1),
-            math.equal(subProduct, 1),
+        const subProduct = multiply(this.preparedMatrix, subI);
+        const specificCount = sum(
+          and(
+            equal(product, 1),
+            equal(subProduct, 1),
           ),
         );
         reachByElement[`e${element}`] = specificCount / this.preparedMatrixSize[0];
+
+        if (handler) {
+          handler((elIndex + 1) / source.elements.length);
+        }
       });
     }
 
-    // @TODO understand
     return {
-      frequency: math.sum(product) / positiveCount,
+      frequency: sum(product) / positiveCount,
       reach: positiveCount / this.preparedMatrixSize[0],
       ...source,
       reachByElement,
@@ -213,12 +225,13 @@ class TurfAnalysis {
   }
 
   /**
+   * @param {Object} args
+   * @param {Function} handler
    * @returns {CalcLadderResult}
    */
-  calcLadder() {
+  calcLadder(args, handler) {
     const ladder = [null];
 
-    // @TODO understand
     for (let i = 1; i <= this.preparedMatrixSize[1]; i += 1) {
       // eslint-disable-next-line prefer-destructuring
       ladder[i - 1] = searchInLadder(
@@ -227,6 +240,11 @@ class TurfAnalysis {
         i,
       )[0];
       ladder[i - 1].name = `Top ${i === 1 ? 'item' : `${i}-way combo`}`;
+
+      if (handler) {
+        console.log(i, this.preparedMatrixSize[1]);
+        handler(i / this.preparedMatrixSize[1]);
+      }
     }
 
     return ladder;
