@@ -149,6 +149,10 @@ function searchInLadder(size, calcMetrics, elementsLength = 1, top = 20) {
  * @classdesc TURF Analysis
  */
 class TurfAnalysis {
+  static getConversionMethods() {
+    return conversions;
+  }
+
   /**
    * @param {[[Number]]} records
    * @param {('top'|'equal'|'less'|'lessOrEqual'|'more'|'moreOrEqual')} [conversionMethod='top']

@@ -1,5 +1,5 @@
 {
-  "name": "turf-analysis-core",
+  "name": "@conjointly/turf-analysis-core",
   "version": "1.0.0",
   "description": "TURF Analysis Core Application",
   "main": "index.js",

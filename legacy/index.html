@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en"> 
+<html lang="en">
 <head>
     <meta charset="utf-8"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/6.2.5/math.min.js" type="text/javascript"></script>
@@ -10,10 +10,10 @@
 <body>
   <script type="text/javascript">
 	/* global math */
-  
-  
+
+
 	// Пример входных данных
-	
+
 	var A =  [
 		[0,-3.05920209082898,1.04768042202492,-3.55465460552836,-3.98029114929742,-4.00309310744563,-3.38398352527482,-1.79917087900046],
 		[0,0.512813624763049,1.55380391987936,6.84118377745602,5.23618607956046,3.03605507843981,0.807520169182214,1.32050938287159],
@@ -214,27 +214,27 @@
 		[0,-1.2283876191861,1.03481312465117,1.66556159443313,-0.0270162325941908,-0.43264907344024,-1.43742774342766,-0.443488552993818],
 		[0,2.28840210188997,-1.76714565125486,0.116180520438549,-1.99399316061434,-1.96197031499974,0.992863390106609,4.85945617004884]
 		] ;
-		
-	
+
+
 	let TURF = class{
-	
-		// Конструктор, который берет данные и настройки того, какое значение в яйчейке считать за успешное 
-		
+
+		// Конструктор, который берет данные и настройки того, какое значение в яйчейке считать за успешное
+
 		constructor(originalMatrix,conversionMethod="top", cutoffValue=1) {
-			
+
 			var preparedMatrix=[];
 			originalMatrix.forEach(function(element){
 				preparedMatrix.push(this[conversionMethod](element,cutoffValue));
 			},this);
-			
+
 			this.originalMatrix = math.matrix(originalMatrix);
 			this.preparedMatrix = math.matrix(preparedMatrix);
 			this.size = this.preparedMatrix.size();
 		}
-		
-		
-		// Разные методы настройки того, какое значение в яйчейке считать за успешное 
-		
+
+
+		// Разные методы настройки того, какое значение в яйчейке считать за успешное
+
 		top(row,cutoffValue){
 			return (this.lesserThanOrEqualTo(this.rank(row),cutoffValue));
 		}
@@ -247,10 +247,10 @@
 		lesserThanOrEqualTo(row,cutoffValue){
 			return( row.slice().map(function(v){ return v <= cutoffValue }));
 		}
-		
-		
+
+
 		// Вспомогательные функции
-		
+
 		rank(arr){
 			var sorted = arr.slice().sort(function(a,b){return b-a;});
 			return(arr.slice().map(function(v){ return sorted.indexOf(v)+1; }));
@@ -275,27 +275,27 @@
 	        }
 	        return(result);
 		};
-		
-		
+
+
 		/* Функция, которая считаем сами метрики - reach и frequency
-		
+
 		 withReachByElement = true требуется когда отрисовываются графики, потому что reachByElement показывает проценты метрики reach для каждого концепта
 		 Она выдаёт например такое:
-		
+
 			{"frequency":1.245152354570637,"reach":0.6446428571428572,"elements":[1,2],"name":"Test B","reachByElement":{"common":0.15803571428571428,"e1":0.2330357142857143,"e2":0.25357142857142856}}
-			
-			Это означает, что мы рассматриваем сочетание элементов 1 и 2. 
+
+			Это означает, что мы рассматриваем сочетание элементов 1 и 2.
 			Сочетание (сценарий) называется "Test B"
 			frequency = 1.25
 			reach = 64.5%
-			
+
 			В графике мы отрисуем для элемента 1 (e1):  23.3%
 			                      для элемента 2 (e2):  25.4%
 			                      общий охват (common): 15.8%%
-			
-		
+
+
 		*/
-		
+
 		calcMetrics(S,withReachByElement=false){
 			var that = this;
 			var I = math.zeros(this.size[1]);
@@ -304,11 +304,11 @@
 			});
 			var product = math.multiply( this.preparedMatrix, I );
 			var positiveCount = math.sum(math.isPositive(product));
-			
+
 			if(withReachByElement){
 				var reachByElement={
 					"common": math.sum(math.larger(product,1))/this.size[0]
-				}; 
+				};
 				S.elements.forEach(function(element){
 					var subI = math.zeros(that.size[1]);
 					subI.set([element],1);
@@ -318,11 +318,11 @@
 						math.equal(subProduct,1)
 					));
 					reachByElement["e"+element] = specificCount/that.size[0];
-				});		
+				});
 			}else{
 				var reachByElement=null;
 			}
-			
+
 			return({
 				frequency: math.sum(product)/positiveCount,
 				reach: positiveCount/this.size[0],
@@ -331,7 +331,7 @@
 				reachByElement: reachByElement
 			});
 		}
-		
+
 		// Функция, которая составляет лесенку - массив сценариев, которые содержат оптимальные сочетания концептов.
 		// Первый элемент лесенки - сценарий с один оптимальным концептом
 		// второй - сочетание сценариев с двумя оптимальными концептами
@@ -349,19 +349,19 @@
 		  }
 		  return(ladder);
 		};
-		
+
 		// Функция, которая выполняет поиск оптимальных сочетаний концептов
-		// dim - это сколько концептов в сочетании 
+		// dim - это сколько концептов в сочетании
 		// top - это сколько оптимальных сочетаний-концептов выдать
 		search(dim=1,top=20){
 	        if(dim> this.size[1]){
 				console.log("Error: Not enough dimensions");
-				return(false);	
-	        } 
-	        
-	        var sequence = math.range(0,  this.size[1]); 
+				return(false);
+	        }
+
+	        var sequence = math.range(0,  this.size[1]);
 	        var dimSequence = math.range(0, dim);
-	
+
 	        console.log("TURF search for combinations of ",dim,": Get 1000 random combinations...");
 	        var candidates = [];
 	        var joinedStrings = [];
@@ -372,7 +372,7 @@
 	          joinedStrings.push(joinedString);
 	          candidates.push(this.calcMetrics({elements:E}));
 	        }
-	        
+
 	        var sortByReachAndFrequency = function(a, b) {
 	        	var diff = b.reach - a.reach;
 	        	if(diff==0){
@@ -391,11 +391,11 @@
 				}
 		        return false;
 		    };
-		        
+
 	        candidates = math.sort(candidates, sortByReachAndFrequency);
 	        var minTop = math.min(top,candidates.length);
 	        candidates = this.safeSubset(candidates,math.index(math.range(0,minTop)));
-	
+
 	       j_: for (let j = 0; j < 20; j++){
 	        	console.log("TURF search for combinations of ",dim,": Iterate on top random combinations: Round ",j);
 		        i_: for (let i = 0; i < minTop; i++){
@@ -413,25 +413,26 @@
 	        }
 	        return(candidates);
 		};
-		
+
 		//Getters
 		get ladder(){
 			return this.calcLadder();
 		};
-		
+
 	};
-	
-	
+
+
 	// Пример запросов
 	// var T1 = new TURF(A);
-	var T2 = new TURF(A,"greaterThan",1);
-	var T2ladder = T2.calcLadder();
-	console.log(T2ladder);
+	// var T2 = new TURF(A,"greaterThan",1);
+	// var T2ladder = T2.calcLadder();
+	// console.log(T2ladder);
 	// console.log(T1.calcMetrics({elements:[1,2],name:"Test A"},true));
-	// var BB = new TURF(B); console.log(BB.calcMetrics({elements:[1,2],name:"Test B"},true));
+	var BB = new TURF(B.slice(0, 2), 'greaterThan', 1); //console.log(BB.calcMetrics({elements:[1,2],name:"Test B"},true));
+    console.log(BB.calcLadder());
 
-	
+
   </script>
-  
+
 </body>
 </html>
