@@ -1,6 +1,6 @@
 {
   "name": "@conjointly/turf-analysis-core",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "TURF Analysis Core Application",
   "main": "index.js",
   "repository": "git@github.com:Conjoint-ly/turf-analysis-core.git",
